@@ -39,12 +39,15 @@ const STATUS_CONFIG = {
 const STATUS_LIST = [STATUS.ESPERANDO, STATUS.CONTACTADO, STATUS.MEMBRO];
 const FILTERS = ['Todos', ...STATUS_LIST];
 
+// Regra de SLA crítico compartilhada (Card + ordenação da lista)
+const checkSlaBreached = (person) => person.status === STATUS.ESPERANDO && person.dias >= 14;
+
 /* ------------------------------------------------------------------ */
 /* Mock data — 5 convertidos em status diferentes                     */
 /* ------------------------------------------------------------------ */
 const INITIAL_CONVERTS = [
   { id: 1, nome: 'Mariana Costa', bairro: 'Asa Sul', distancia: '1.4 km da igreja', dias: 1, status: STATUS.ESPERANDO },
-  { id: 2, nome: 'Pedro Henrique Alves', bairro: 'Águas Claras', distancia: '2.1 km da igreja', dias: 3, status: STATUS.ESPERANDO },
+  { id: 2, nome: 'Pedro Henrique Alves', bairro: 'Águas Claras', distancia: '2.1 km da igreja', dias: 15, status: STATUS.ESPERANDO },
   { id: 3, nome: 'Juliana Ferreira', bairro: 'Taguatinga', distancia: '3.5 km da igreja', dias: 5, status: STATUS.CONTACTADO },
   { id: 4, nome: 'Lucas Martins', bairro: 'Sudoeste', distancia: '0.8 km da igreja', dias: 2, status: STATUS.CONTACTADO },
   { id: 5, nome: 'Camila Rodrigues', bairro: 'Guará', distancia: '2.9 km da igreja', dias: 9, status: STATUS.MEMBRO },
@@ -67,6 +70,7 @@ function GlobalStyles() {
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes pulseSla { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
       .anim-fade { animation: fadeIn 0.2s ease-out; }
     `}</style>
   );
@@ -152,9 +156,16 @@ function ConvertCard({ person, index, onContact, onMarkMember }) {
   const avatarBg = index % 2 === 0 ? COLORS.accent : COLORS.cardAlt;
   const avatarColor = index % 2 === 0 ? '#121212' : COLORS.cream;
   const isMember = person.status === STATUS.MEMBRO;
+  const isSlaBreached = person.status === STATUS.ESPERANDO && person.dias >= 14;
 
   return (
-    <div className="rounded-2xl p-4" style={{ backgroundColor: COLORS.card, border: '1px solid rgba(250,246,237,0.06)' }}>
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        backgroundColor: isSlaBreached ? '#2A1414' : COLORS.card,
+        border: isSlaBreached ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(250,246,237,0.06)',
+      }}
+    >
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-3 min-w-0">
           <div
@@ -174,6 +185,15 @@ function ConvertCard({ person, index, onContact, onMarkMember }) {
         <StatusBadge status={person.status} />
       </div>
 
+      {isSlaBreached && (
+        <div
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 mb-3"
+          style={{ backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', animation: 'pulseSla 1.6s ease-in-out infinite' }}
+        >
+          <span className="text-xs font-bold" style={{ color: '#EF4444' }}>🔴 Alerta SLA (14+ dias)</span>
+        </div>
+      )}
+
       <div className="flex items-center gap-1 mb-4">
         <Clock size={12} style={{ color: 'rgba(250,246,237,0.4)' }} />
         <span className="text-xs" style={{ color: 'rgba(250,246,237,0.4)' }}>
@@ -189,23 +209,22 @@ function ConvertCard({ person, index, onContact, onMarkMember }) {
           <BadgeCheck size={16} style={{ color: STATUS_CONFIG[STATUS.MEMBRO].color }} />
           <span className="text-xs font-semibold" style={{ color: STATUS_CONFIG[STATUS.MEMBRO].color }}>Já é membro da comunidade</span>
         </div>
+      ) : person.status === STATUS.CONTACTADO ? (
+        <button
+          onClick={() => onMarkMember(person)}
+          className="w-full flex items-center justify-center text-center rounded-xl py-2.5 font-bold text-xs leading-tight transition-transform active:scale-95"
+          style={{ backgroundColor: COLORS.accent, color: '#121212' }}
+        >
+          ✨ Marcar como Membro Local
+        </button>
       ) : (
-        <div className="flex gap-2">
-          <button
-            onClick={() => onContact(person)}
-            className="flex-1 flex items-center justify-center text-center rounded-xl py-2.5 font-bold text-xs leading-tight transition-transform active:scale-95"
-            style={{ backgroundColor: COLORS.whatsapp, color: '#0b2b16' }}
-          >
-            🟢 Entrar em Contato (WhatsApp)
-          </button>
-          <button
-            onClick={() => onMarkMember(person)}
-            className="flex-1 flex items-center justify-center text-center rounded-xl py-2.5 font-bold text-xs leading-tight transition-transform active:scale-95"
-            style={{ backgroundColor: COLORS.accent, color: '#121212' }}
-          >
-            ✨ Marcar como Membro Local
-          </button>
-        </div>
+        <button
+          onClick={() => onContact(person)}
+          className="w-full flex items-center justify-center text-center rounded-xl py-2.5 font-bold text-xs leading-tight transition-transform active:scale-95"
+          style={{ backgroundColor: COLORS.whatsapp, color: '#0b2b16' }}
+        >
+          🟢 Entrar em Contato (WhatsApp)
+        </button>
       )}
     </div>
   );
@@ -266,6 +285,9 @@ export default function App() {
   };
 
   const handleMarkMember = (person) => {
+    const confirmed = window.confirm(`Tem certeza que deseja marcar ${person.nome} como membro local da sua comunidade?`);
+    if (!confirmed) return;
+
     const firstName = person.nome.split(' ')[0];
     setConverts((prev) => prev.map((c) => (c.id === person.id ? { ...c, status: STATUS.MEMBRO } : c)));
     showToast(`🎉 ${firstName} agora é membro local!`);
@@ -276,7 +298,14 @@ export default function App() {
     return acc;
   }, {});
 
-  const filtered = filter === 'Todos' ? converts : converts.filter((c) => c.status === filter);
+  const filtered = (filter === 'Todos' ? converts : converts.filter((c) => c.status === filter))
+    .slice()
+    .sort((a, b) => {
+      const aBreached = checkSlaBreached(a);
+      const bBreached = checkSlaBreached(b);
+      if (aBreached === bBreached) return 0;
+      return aBreached ? -1 : 1;
+    });
 
   return (
     <div className="min-h-screen w-full flex justify-center" style={{ backgroundColor: '#0a0a0a', fontFamily: FONT_BODY }}>

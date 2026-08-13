@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Sunrise, User, Phone, MapPin, Check, MessageCircle,
-  Landmark, Video, BookOpen, Heart, Share2, Play, ExternalLink,
+  Landmark, Video, BookOpen, Play, ExternalLink,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -23,18 +23,17 @@ const FONT_BODY = "'Inter', sans-serif";
 /* Mock data                                                          */
 /* ------------------------------------------------------------------ */
 const CHURCHES = [
-  { id: 1, name: 'Comunidade Vida Nova', pastor: 'Pr. João Pereira', distance: '1.2 km de você', denom: 'Presbiteriana', tags: ['Culto de Jovens', 'Estudo Bíblico'] },
-  { id: 2, name: 'Igreja Batista Renovada', pastor: 'Pra. Marta Alves', distance: '1.8 km de você', denom: 'Batista', tags: ['Ação Social', 'Culto de Jovens'] },
-  { id: 3, name: 'Assembleia de Deus Belém', pastor: 'Pr. Carlos Souza', distance: '2.4 km de você', denom: 'Assembleia de Deus', tags: ['Estudo Bíblico', 'Ação Social'] },
-  { id: 4, name: 'Igreja Presbiteriana Esperança', pastor: 'Pr. Rafael Lima', distance: '3.1 km de você', denom: 'Presbiteriana', tags: ['Culto de Jovens', 'Estudo Bíblico', 'Ação Social'] },
-  { id: 5, name: 'Comunidade Cristã Restauração', pastor: 'Pra. Ana Costa', distance: '3.6 km de você', denom: 'Interdenominacional', tags: ['Ação Social', 'Estudo Bíblico'] },
+  { id: 1, name: 'Comunidade Vida Nova', pastor: 'Pr. João Pereira', distance: '1.2 km de você', denom: 'Presbiteriana', endereco: 'SQS 308, Asa Sul, Brasília - DF', tags: ['Culto de Jovens', 'Estudo Bíblico'] },
+  { id: 2, name: 'Igreja Batista Renovada', pastor: 'Pra. Marta Alves', distance: '1.8 km de você', denom: 'Batista', endereco: 'QNM 24, Taguatinga Norte, Brasília - DF', tags: ['Ação Social', 'Culto de Jovens'] },
+  { id: 3, name: 'Assembleia de Deus Belém', pastor: 'Pr. Carlos Souza', distance: '2.4 km de você', denom: 'Assembleia de Deus', endereco: 'QNA 15, Taguatinga, Brasília - DF', tags: ['Estudo Bíblico', 'Ação Social'] },
+  { id: 4, name: 'Igreja Presbiteriana Esperança', pastor: 'Pr. Rafael Lima', distance: '3.1 km de você', denom: 'Presbiteriana', endereco: 'SQSW 105, Sudoeste, Brasília - DF', tags: ['Culto de Jovens', 'Estudo Bíblico', 'Ação Social'] },
+  { id: 5, name: 'Comunidade Cristã Restauração', pastor: 'Pra. Ana Costa', distance: '3.6 km de você', denom: 'Interdenominacional', endereco: 'QE 38, Guará, Brasília - DF', tags: ['Ação Social', 'Estudo Bíblico'] },
 ];
 
 const VIDEOS = [
   { id: 1, eyebrow: 'PRIMEIROS PASSOS', title: 'Como a Bíblia é dividida?', caption: 'Antigo e Novo Testamento explicados de um jeito simples.', likes: 842, shares: 96 },
   { id: 2, eyebrow: 'VIDA DE ORAÇÃO', title: 'Como começar a orar?', caption: 'Um guia simples para sua primeira conversa com Deus.', likes: 1204, shares: 158 },
   { id: 3, eyebrow: 'HÁBITOS DE FÉ', title: 'Dicas para o devocional', caption: 'Como criar o hábito de ler a Bíblia todos os dias.', likes: 673, shares: 71 },
-  { id: 4, eyebrow: 'SACRAMENTOS', title: 'O que significa ser batizado?', caption: 'Entenda qual é o próximo passo da sua caminhada.', likes: 511, shares: 64 },
   { id: 5, eyebrow: 'COMUNIDADE', title: 'Por que fazer parte de uma igreja?', caption: 'A importância de caminhar acompanhado na fé.', likes: 389, shares: 42 },
 ];
 
@@ -82,7 +81,7 @@ function GlobalStyles() {
 /* ------------------------------------------------------------------ */
 /* Small building blocks                                              */
 /* ------------------------------------------------------------------ */
-function TextField({ label, value, onChange, placeholder, type = 'text', icon: Icon }) {
+function TextField({ label, value, onChange, placeholder, type = 'text', icon: Icon, inputMode }) {
   return (
     <div>
       <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: 'rgba(250,246,237,0.55)' }}>
@@ -92,6 +91,7 @@ function TextField({ label, value, onChange, placeholder, type = 'text', icon: I
         {Icon && <Icon size={17} style={{ color: COLORS.accent, flexShrink: 0 }} />}
         <input
           type={type}
+          inputMode={inputMode}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -156,7 +156,7 @@ function CustomCheckbox({ checked, onChange, children }) {
 /* ------------------------------------------------------------------ */
 /* Tela 1 — Cadastro Inicial                                          */
 /* ------------------------------------------------------------------ */
-function CadastroScreen({ form, updateField, onSubmit, isValid }) {
+function CadastroScreen({ form, updateField, onSubmit, isValid, onWhatsappChange, onIdadeChange, onCepChange }) {
   return (
     <div className="flex flex-col flex-1">
       <div className="px-6 pt-12 pb-7 flex flex-col items-center text-center" style={{ backgroundColor: COLORS.bgAlt, borderBottom: '1px solid rgba(250,246,237,0.06)' }}>
@@ -176,9 +176,9 @@ function CadastroScreen({ form, updateField, onSubmit, isValid }) {
         <div className="space-y-4">
           <p className="text-xs font-bold tracking-widest" style={{ color: COLORS.accent }}>SEUS DADOS</p>
           <TextField label="Nome completo" value={form.nome} onChange={(v) => updateField('nome', v)} placeholder="Digite seu nome completo" icon={User} />
-          <TextField label="WhatsApp" value={form.whatsapp} onChange={(v) => updateField('whatsapp', v)} placeholder="(61) 99999-9999" type="tel" icon={Phone} />
-          <TextField label="Idade" value={form.idade} onChange={(v) => updateField('idade', v)} placeholder="Ex: 28" type="number" />
-          <PillSelect label="Sexo" options={['Masculino', 'Feminino', 'Prefiro não informar']} value={form.sexo} onChange={(v) => updateField('sexo', v)} />
+          <TextField label="WhatsApp" value={form.whatsapp} onChange={onWhatsappChange} placeholder="(61) 99999-9999" type="tel" icon={Phone} inputMode="numeric" />
+          <TextField label="Idade" value={form.idade} onChange={onIdadeChange} placeholder="Ex: 28" type="text" inputMode="numeric" />
+          <PillSelect label="Sexo" options={['Masculino', 'Feminino']} value={form.sexo} onChange={(v) => updateField('sexo', v)} />
         </div>
 
         <div className="space-y-4">
@@ -186,7 +186,7 @@ function CadastroScreen({ form, updateField, onSubmit, isValid }) {
           <TextField label="Endereço residencial" value={form.endereco} onChange={(v) => updateField('endereco', v)} placeholder="Rua, número" icon={MapPin} />
           <div className="grid grid-cols-2 gap-3">
             <TextField label="Bairro" value={form.bairro} onChange={(v) => updateField('bairro', v)} placeholder="Ex: Asa Sul" />
-            <TextField label="CEP" value={form.cep} onChange={(v) => updateField('cep', v)} placeholder="70000-000" />
+            <TextField label="CEP" value={form.cep} onChange={onCepChange} placeholder="70000-000" inputMode="numeric" />
           </div>
           <p className="text-xs leading-relaxed" style={{ color: 'rgba(250,246,237,0.55)' }}>
             Usamos seu endereço de casa para indicar as igrejas mais próximas de onde você mora.
@@ -198,6 +198,14 @@ function CadastroScreen({ form, updateField, onSubmit, isValid }) {
           <CustomCheckbox checked={form.lgpd} onChange={(v) => updateField('lgpd', v)}>
             Li e aceito os Termos de Uso e a Política de Privacidade, em conformidade com a LGPD.
           </CustomCheckbox>
+          <div className="flex items-center gap-4" style={{ paddingLeft: 34 }}>
+            <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold underline underline-offset-2" style={{ color: COLORS.accent }}>
+              Termos de Uso
+            </a>
+            <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold underline underline-offset-2" style={{ color: COLORS.accent }}>
+              Política de Privacidade
+            </a>
+          </div>
         </div>
 
         <button
@@ -258,19 +266,28 @@ function BottomNav({ active, onChange }) {
 }
 
 /* ---- Aba 1: Igrejas Próximas -------------------------------------- */
-function ChurchCard({ church, index, onWhatsApp }) {
-  const glow = 0.26 + (index % 3) * 0.07;
+function ChurchCard({ church, onWhatsApp }) {
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${church.name}, ${church.endereco}`)}`;
+
   return (
     <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: COLORS.card, border: '1px solid rgba(250,246,237,0.06)' }}>
-      <div
-        className="relative h-28 flex items-center justify-center"
-        style={{ backgroundImage: `linear-gradient(165deg, #1E1E1E 0%, #1E1E1E 45%, rgba(229,184,76,${glow}) 145%)` }}
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`Abrir ${church.name} no Google Maps`}
+        className="relative h-28 flex items-center justify-center cursor-pointer"
+        style={{
+          backgroundColor: '#15171C',
+          backgroundImage:
+            'repeating-linear-gradient(0deg, rgba(250,246,237,0.05) 0px, rgba(250,246,237,0.05) 1px, transparent 1px, transparent 22px), repeating-linear-gradient(90deg, rgba(250,246,237,0.05) 0px, rgba(250,246,237,0.05) 1px, transparent 1px, transparent 22px)',
+        }}
       >
-        <Landmark size={34} style={{ color: 'rgba(250,246,237,0.18)' }} />
+        <MapPin size={30} strokeWidth={2} style={{ color: '#EF4444', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }} />
         <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: COLORS.accent, color: '#121212' }}>
           {church.distance}
         </span>
-      </div>
+      </a>
       <div className="p-4">
         <h3 className="text-base font-bold" style={{ color: COLORS.cream, fontFamily: FONT_DISPLAY }}>{church.name}</h3>
         <div className="flex items-center gap-1.5 mt-1 mb-3">
@@ -305,7 +322,7 @@ function IgrejasTab({ bairro, onWhatsApp }) {
         </h2>
         <p className="text-xs mt-1" style={{ color: 'rgba(250,246,237,0.5)' }}>Encontramos comunidades para você conhecer</p>
       </div>
-      {CHURCHES.map((c, i) => <ChurchCard key={c.id} church={c} index={i} onWhatsApp={onWhatsApp} />)}
+      {CHURCHES.map((c) => <ChurchCard key={c.id} church={c} onWhatsApp={onWhatsApp} />)}
     </div>
   );
 }
@@ -343,7 +360,7 @@ function WhatsAppModal({ church, onClose }) {
 }
 
 /* ---- Aba 2: Vídeos (estilo Reels) ---------------------------------- */
-function VideoSlide({ video, liked, onLike }) {
+function VideoSlide({ video }) {
   return (
     <div
       className="h-full w-full snap-start relative flex flex-col justify-end flex-shrink-0"
@@ -355,22 +372,7 @@ function VideoSlide({ video, liked, onLike }) {
         </div>
       </div>
 
-      <div className="absolute right-3 bottom-28 flex flex-col items-center gap-5">
-        <button onClick={onLike} className="flex flex-col items-center gap-1">
-          <div className="rounded-full flex items-center justify-center" style={{ width: 42, height: 42, backgroundColor: 'rgba(30,30,30,0.7)' }}>
-            <Heart size={20} style={{ color: liked ? COLORS.accent : COLORS.cream }} fill={liked ? COLORS.accent : 'none'} />
-          </div>
-          <span className="text-xs" style={{ color: COLORS.cream }}>{video.likes + (liked ? 1 : 0)}</span>
-        </button>
-        <button className="flex flex-col items-center gap-1">
-          <div className="rounded-full flex items-center justify-center" style={{ width: 42, height: 42, backgroundColor: 'rgba(30,30,30,0.7)' }}>
-            <Share2 size={19} style={{ color: COLORS.cream }} />
-          </div>
-          <span className="text-xs" style={{ color: COLORS.cream }}>{video.shares}</span>
-        </button>
-      </div>
-
-      <div className="px-5 pb-8 pr-16 relative">
+      <div className="px-5 pb-8 relative">
         <span className="text-xs font-bold tracking-widest" style={{ color: COLORS.accent }}>{video.eyebrow}</span>
         <h3 className="text-xl font-bold mt-1" style={{ color: COLORS.cream, fontFamily: FONT_DISPLAY }}>{video.title}</h3>
         <p className="text-sm mt-1.5" style={{ color: 'rgba(250,246,237,0.7)' }}>{video.caption}</p>
@@ -379,11 +381,11 @@ function VideoSlide({ video, liked, onLike }) {
   );
 }
 
-function VideosTab({ likedVideos, toggleLike }) {
+function VideosTab() {
   return (
     <div className="h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar">
       {VIDEOS.map((v) => (
-        <VideoSlide key={v.id} video={v} liked={!!likedVideos[v.id]} onLike={() => toggleLike(v.id)} />
+        <VideoSlide key={v.id} video={v} />
       ))}
     </div>
   );
@@ -444,10 +446,55 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('igrejas');
   const [modalChurch, setModalChurch] = useState(null);
   const [toast, setToast] = useState('');
-  const [likedVideos, setLikedVideos] = useState({});
   const toastTimer = useRef(null);
 
   const updateField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  // Sanitização: WhatsApp aceita estritamente dígitos
+  const handleWhatsappChange = (value) => {
+    let valor = value.replace(/\D/g, ''); // remove tudo que não é número
+    valor = valor.slice(0, 11); // limita a 11 dígitos (DDD + 9 dígitos)
+    if (valor.length > 10) {
+      // celular: (XX) XXXXX-XXXX
+      valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    } else if (valor.length > 6) {
+      // fixo: (XX) XXXX-XXXX
+      valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    } else if (valor.length > 2) {
+      valor = valor.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    } else if (valor.length > 0) {
+      valor = valor.replace(/^(\d*)/, '($1');
+    }
+    updateField('whatsapp', valor);
+  };
+
+  // Sanitização: Idade aceita apenas dígitos (remove "-", "e", "." etc.), limitada a 3 dígitos
+  const handleIdadeChange = (value) => {
+    updateField('idade', value.replace(/\D/g, '').slice(0, 3));
+  };
+
+  // Sanitização: CEP aceita apenas dígitos, limitado a 8 caracteres.
+  // Ao atingir 8 dígitos, consulta o ViaCEP e autopreenche endereco/bairro.
+  const handleCepChange = async (value) => {
+    const digitsOnly = value.replace(/\D/g, '').slice(0, 8);
+    updateField('cep', digitsOnly);
+
+    if (digitsOnly.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${digitsOnly}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          setForm((prev) => ({
+            ...prev,
+            endereco: data.logradouro || prev.endereco,
+            bairro: data.bairro || prev.bairro,
+          }));
+        }
+      } catch (err) {
+        console.error('Erro ao consultar ViaCEP:', err);
+      }
+    }
+  };
 
   const isValid = !!(form.nome.trim() && form.whatsapp.trim() && form.idade && form.sexo && form.endereco.trim() && form.bairro.trim() && form.cep.trim() && form.lgpd);
 
@@ -455,8 +502,6 @@ export default function App() {
     e.preventDefault();
     if (isValid) setScreen('feed');
   };
-
-  const toggleLike = (id) => setLikedVideos((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const showToast = (label) => {
     setToast(`Abrindo ${label}...`);
@@ -472,13 +517,21 @@ export default function App() {
         <GlobalStyles />
 
         {screen === 'cadastro' ? (
-          <CadastroScreen form={form} updateField={updateField} onSubmit={handleSubmit} isValid={isValid} />
+          <CadastroScreen
+            form={form}
+            updateField={updateField}
+            onSubmit={handleSubmit}
+            isValid={isValid}
+            onWhatsappChange={handleWhatsappChange}
+            onIdadeChange={handleIdadeChange}
+            onCepChange={handleCepChange}
+          />
         ) : (
           <>
             <TopBar firstName={firstName} />
             <main className="flex-1 min-h-0 overflow-y-auto" style={{ backgroundColor: COLORS.bg }}>
               {activeTab === 'igrejas' && <IgrejasTab bairro={form.bairro} onWhatsApp={setModalChurch} />}
-              {activeTab === 'videos' && <VideosTab likedVideos={likedVideos} toggleLike={toggleLike} />}
+              {activeTab === 'videos' && <VideosTab />}
               {activeTab === 'materiais' && <MateriaisTab onBuy={showToast} />}
             </main>
             <BottomNav active={activeTab} onChange={setActiveTab} />
