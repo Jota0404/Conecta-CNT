@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import TelaConvertido from './pages/TelaConvertido';
 import TelaIgrejaParceira from './pages/TelaIgrejaParceira';
 import TelaLideranca from './pages/TelaLideranca';
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
       {/* Barra de navegação simples para alternar entre as telas */}
       <nav style={{ padding: '15px', background: '#1f1f1f', color: '#fff', display: 'flex', gap: '20px' }}>
         <Link to="/" style={{ color: '#61dafb', textDecoration: 'none', fontWeight: 'bold' }}>Tela Convertido</Link>
@@ -21,7 +21,7 @@ function App() {
           <Route path="/lideranca" element={<TelaLideranca />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </>
   );
 }
 
