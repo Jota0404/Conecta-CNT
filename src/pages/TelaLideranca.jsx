@@ -240,9 +240,6 @@ function FunnelPanel({ data }) {
 function GeographicBarChartPanel({ selectedRegion }) {
   const [drilledCity, setDrilledCity] = useState(null);
 
-  // Se o filtro externo de região mudar, reinicia o drill-down local
-  useEffect(() => { setDrilledCity(null); }, [selectedRegion]);
-
   const isRegionLocked = !!selectedRegion && selectedRegion !== 'Todas as Regiões';
   const activeCity = isRegionLocked ? selectedRegion : drilledCity;
   const isDrillable = !isRegionLocked; // só permite clicar para detalhar quando não há filtro externo fixo
@@ -325,7 +322,7 @@ function ChurchMonitoringTable({ rows, selectedRegion }) {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ backgroundColor: COLORS.bgAlt }}>
-              {['Nome da Igreja', 'Cidade / Bairro', 'Encaminhados', 'Contactados', 'Tornados Membros'].map((h) => (
+              {['Nome da Igreja', 'Cidade / Bairro', 'Encaminhados', 'Contactados', 'Membros'].map((h) => (
                 <th key={h} className="text-left px-5 py-3 text-xs font-bold tracking-wide whitespace-nowrap" style={{ color: 'rgba(250,246,237,0.5)' }}>{h}</th>
               ))}
             </tr>
@@ -356,9 +353,9 @@ function ChurchMonitoringTable({ rows, selectedRegion }) {
 /* ------------------------------------------------------------------ */
 function ExportListPanel() {
   const handleExportExcel = () => {
-    // Implementação mockada usando XLSX (SheetJS) ou similar
+    // Implementação mockada — lógica real da biblioteca XLSX (SheetJS) será conectada depois
     // ex: const ws = XLSX.utils.json_to_sheet(data); ... XLSX.writeFile(wb, "convertidos.xlsx");
-    alert('Função acionada: Exportando .xlsx (Requer SheetJS / XLSX na pipeline de build)');
+    console.log('Exportação xlsx acionada');
   };
 
   return (
@@ -373,7 +370,7 @@ function ExportListPanel() {
         className="mt-8 flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-transform active:scale-95"
         style={{ backgroundColor: '#25D366', color: '#0b2b16', boxShadow: '0 8px 24px rgba(37,211,102,0.2)' }}
       >
-        <Download size={18} /> Exportar Base Completa (.xlsx)
+        <Download size={18} /> Exportar para Excel
       </button>
     </div>
   );
@@ -539,7 +536,7 @@ export default function App() {
               <KpiRow data={data} />
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <FunnelPanel data={data} />
-                <GeographicBarChartPanel selectedRegion={regiao} />
+                <GeographicBarChartPanel key={regiao} selectedRegion={regiao} />
               </div>
               <ChurchMonitoringTable rows={CHURCH_TABLE_ROWS} selectedRegion={regiao} />
             </>
